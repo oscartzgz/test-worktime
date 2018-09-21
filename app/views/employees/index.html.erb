@@ -1,0 +1,108 @@
+<h1>Mostrando empleados</h1>
+<div id="container">
+  
+  <table>
+    <thead>
+      <tr>
+        <th>Full Name</th>
+        <th>Address</th>
+        <th>Phone</th>
+        <th>Birthdate</th>
+        <th>Age</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+    </tbody>
+  </table>
+
+  <%= form_tag '/employees', id: :create_employee_form do  %>
+    <%= label_tag :first_name %>
+    <%= text_field_tag :first_name %>
+
+    <%= label_tag :last_name %>
+    <%= text_field_tag :last_name %>
+
+    <%= label_tag :address %>
+    <%= text_field_tag :address %>
+
+    <%= label_tag :phone %>
+    <%= text_field_tag :phone %>
+
+    <%= label_tag :birthdate %>
+    <%= date_field_tag :birthdate %>
+
+    <%= submit_tag %>
+
+    <div class="messages">
+      
+    </div>
+  <% end %>
+</div>
+
+<script>
+  function drawEmployees() {
+    getEmployees().then(function(response){
+        $('#container tbody').html('')
+      response.forEach( function(element, index) {
+        $('#container tbody').append(`
+          <tr id="${element.id}">
+            <td>${element.full_name}</td>
+            <td>${element.address}</td>
+            <td>${element.phone}</td>
+            <td>${element.birthdate}</td>
+            <td>${element.age}</td>
+            <td>
+              <button onclick='initDeleteEmployee(${element.id})' class='delete-record'>delete</button>
+            </td>
+          </tr>
+        `)
+      })
+    })
+  }
+
+  function initDeleteEmployee(id){
+    deleteEmployee(id)
+      .then(function (response) {
+        if ( status == 204){
+          $(`#${id}`).css('background-color', 'red')
+          $(`#${id}`).fadeOut()
+        }
+      })
+  }
+
+  $(document).ready(function () {
+    // Get Employees
+    drawEmployees()
+
+    $('#create_employee_form input[type="submit"]').on("click", function (ev) {
+      ev.preventDefault()
+      data = formToJSON($('#create_employee_form')[0])
+      form = $(this).closest('form')
+      formMsgs = form.find('.messages')
+      formMsgs.html('')
+
+      createEmployee(data)
+        .then(function(response){
+          // Unprocessable entity?
+          if (status == 422){
+            for (error in response) {
+              formMsgs.append(`
+                <div>${response[error]}</div>
+              `).hide().fadeIn()
+            }
+          } else {
+            drawEmployees()
+          }
+        })
+        .catch(function () {
+          console.log('error')
+        })
+    })
+
+
+    
+
+  })
+</script>

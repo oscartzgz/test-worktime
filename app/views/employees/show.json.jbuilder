@@ -1,0 +1,1 @@
+json.extract! @employee, :id, :first_name, :last_name, :full_name, :address, :phone, :birthdate, :age
